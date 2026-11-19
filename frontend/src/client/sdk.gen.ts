@@ -2,7 +2,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { itemsCreateItemData, itemsCreateItemErrors, itemsCreateItemResponses, itemsDeleteItemData, itemsDeleteItemErrors, itemsDeleteItemResponses, itemsReadItemData, itemsReadItemErrors, itemsReadItemResponses, itemsReadItemsData, itemsReadItemsErrors, itemsReadItemsResponses, itemsUpdateItemData, itemsUpdateItemErrors, itemsUpdateItemResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { gameQuickLoginData, gameQuickLoginErrors, gameQuickLoginResponses, gameReadLeaderboardData, gameReadLeaderboardResponses, gameReadProgressData, gameReadProgressResponses, gameSaveProgressData, gameSaveProgressErrors, gameSaveProgressResponses, gameSaveScoreData, gameSaveScoreErrors, gameSaveScoreResponses, itemsCreateItemData, itemsCreateItemErrors, itemsCreateItemResponses, itemsDeleteItemData, itemsDeleteItemErrors, itemsDeleteItemResponses, itemsReadItemData, itemsReadItemErrors, itemsReadItemResponses, itemsReadItemsData, itemsReadItemsErrors, itemsReadItemsResponses, itemsUpdateItemData, itemsUpdateItemErrors, itemsUpdateItemResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -355,6 +355,96 @@ export class ItemsService {
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/items/{id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class GameService {
+    /**
+     * Quick Login
+     *
+     * One-click login: create-or-fetch the kid account, return a standard JWT.
+     *
+     * The account gets a random password hash the kid never knows, so only this
+     * endpoint can sign them in. The same avatar + name always maps to the same
+     * account, so returning players keep their identity across sessions.
+     */
+    public static quickLogin<ThrowOnError extends boolean = true>(options: Options<gameQuickLoginData, ThrowOnError>) {
+        return (options.client ?? client).post<gameQuickLoginResponses, gameQuickLoginErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/game/quick-login',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Save Score
+     *
+     * Store one finished game run for the logged-in kid.
+     *
+     * player_name is taken from the authenticated user, never from the client,
+     * so nobody can post scores under someone else's name.
+     */
+    public static saveScore<ThrowOnError extends boolean = true>(options: Options<gameSaveScoreData, ThrowOnError>) {
+        return (options.client ?? client).post<gameSaveScoreResponses, gameSaveScoreErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/game/scores',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Read Leaderboard
+     *
+     * Top 10 scores, highest first, earlier achievement breaking ties.
+     */
+    public static readLeaderboard<ThrowOnError extends boolean = true>(options?: Options<gameReadLeaderboardData, ThrowOnError>) {
+        return (options?.client ?? client).get<gameReadLeaderboardResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/game/leaderboard',
+            ...options
+        });
+    }
+    
+    /**
+     * Read Progress
+     *
+     * The kid's saved level so a returning player resumes where they left.
+     */
+    public static readProgress<ThrowOnError extends boolean = true>(options?: Options<gameReadProgressData, ThrowOnError>) {
+        return (options?.client ?? client).get<gameReadProgressResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/game/progress',
+            ...options
+        });
+    }
+    
+    /**
+     * Save Progress
+     *
+     * Store level completion / failure / finish state for the logged-in kid.
+     */
+    public static saveProgress<ThrowOnError extends boolean = true>(options: Options<gameSaveProgressData, ThrowOnError>) {
+        return (options.client ?? client).put<gameSaveProgressResponses, gameSaveProgressErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/game/progress',
             ...options,
             headers: {
                 'Content-Type': 'application/json',

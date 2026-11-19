@@ -1,10 +1,21 @@
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import (
+    GameProgress,
+    Item,
+    ItemCreate,
+    ProgressUpdate,
+    Score,
+    ScoreCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -66,3 +77,40 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_score(
+    *, session: Session, score_in: ScoreCreate, player_name: str
+) -> Score:
+    db_obj = Score.model_validate(score_in, update={"player_name": player_name})
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_leaderboard(*, session: Session, limit: int = 10) -> Sequence[Score]:
+    statement = (
+        select(Score)
+        .order_by(col(Score.points).desc(), col(Score.created_at).asc())
+        .limit(limit)
+    )
+    return session.exec(statement).all()
+
+
+def get_progress(*, session: Session, user_id: uuid.UUID) -> GameProgress | None:
+    return session.get(GameProgress, user_id)
+
+
+def upsert_progress(
+    *, session: Session, user_id: uuid.UUID, progress_in: ProgressUpdate
+) -> GameProgress:
+    db_obj = session.get(GameProgress, user_id)
+    if db_obj is None:
+        db_obj = GameProgress(user_id=user_id, **progress_in.model_dump())
+    else:
+        db_obj.sqlmodel_update(progress_in.model_dump())
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj

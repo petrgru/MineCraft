@@ -5,6 +5,13 @@ export type ClientOptions = {
 };
 
 /**
+ * AvatarType
+ *
+ * The four big animal avatars a kid can pick with one mouse click.
+ */
+export type AvatarType = 'lion' | 'fox' | 'bear' | 'frog';
+
+/**
  * Body_login-login_access_token
  */
 export type Body_login_login_access_token = {
@@ -113,6 +120,16 @@ export type ItemsPublic = {
 };
 
 /**
+ * LeaderboardPublic
+ */
+export type LeaderboardPublic = {
+    /**
+     * Scores
+     */
+    scores: Array<ScorePublic>;
+};
+
+/**
  * Message
  */
 export type Message = {
@@ -156,6 +173,95 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * ProgressPublic
+ */
+export type ProgressPublic = {
+    /**
+     * Current Level
+     */
+    current_level: number;
+    /**
+     * Total Points
+     */
+    total_points: number;
+    /**
+     * Is Finished
+     */
+    is_finished: boolean;
+};
+
+/**
+ * ProgressUpdate
+ */
+export type ProgressUpdate = {
+    /**
+     * Current Level
+     */
+    current_level: number;
+    /**
+     * Total Points
+     */
+    total_points: number;
+    /**
+     * Is Finished
+     */
+    is_finished?: boolean;
+};
+
+/**
+ * QuickLoginRequest
+ */
+export type QuickLoginRequest = {
+    avatar: AvatarType;
+    /**
+     * Player Name
+     */
+    player_name?: string | null;
+};
+
+/**
+ * ScoreCreate
+ */
+export type ScoreCreate = {
+    avatar?: AvatarType;
+    /**
+     * Points
+     */
+    points: number;
+    /**
+     * Completed Levels
+     */
+    completed_levels?: number;
+};
+
+/**
+ * ScorePublic
+ */
+export type ScorePublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Player Name
+     */
+    player_name: string;
+    avatar: AvatarType;
+    /**
+     * Points
+     */
+    points: number;
+    /**
+     * Completed Levels
+     */
+    completed_levels: number;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
 };
 
 /**
@@ -920,6 +1026,113 @@ export type itemsUpdateItemResponses = {
 };
 
 export type itemsUpdateItemResponse = itemsUpdateItemResponses[keyof itemsUpdateItemResponses];
+
+export type gameQuickLoginData = {
+    body: QuickLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/game/quick-login';
+};
+
+export type gameQuickLoginErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type gameQuickLoginError = gameQuickLoginErrors[keyof gameQuickLoginErrors];
+
+export type gameQuickLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: Token;
+};
+
+export type gameQuickLoginResponse = gameQuickLoginResponses[keyof gameQuickLoginResponses];
+
+export type gameSaveScoreData = {
+    body: ScoreCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/game/scores';
+};
+
+export type gameSaveScoreErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type gameSaveScoreError = gameSaveScoreErrors[keyof gameSaveScoreErrors];
+
+export type gameSaveScoreResponses = {
+    /**
+     * Successful Response
+     */
+    201: ScorePublic;
+};
+
+export type gameSaveScoreResponse = gameSaveScoreResponses[keyof gameSaveScoreResponses];
+
+export type gameReadLeaderboardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/game/leaderboard';
+};
+
+export type gameReadLeaderboardResponses = {
+    /**
+     * Successful Response
+     */
+    200: LeaderboardPublic;
+};
+
+export type gameReadLeaderboardResponse = gameReadLeaderboardResponses[keyof gameReadLeaderboardResponses];
+
+export type gameReadProgressData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/game/progress';
+};
+
+export type gameReadProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProgressPublic;
+};
+
+export type gameReadProgressResponse = gameReadProgressResponses[keyof gameReadProgressResponses];
+
+export type gameSaveProgressData = {
+    body: ProgressUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/game/progress';
+};
+
+export type gameSaveProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type gameSaveProgressError = gameSaveProgressErrors[keyof gameSaveProgressErrors];
+
+export type gameSaveProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProgressPublic;
+};
+
+export type gameSaveProgressResponse = gameSaveProgressResponses[keyof gameSaveProgressResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

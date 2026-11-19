@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as GameRouteImport } from './routes/game'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -21,6 +22,11 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameRoute = GameRouteImport.update({
+  id: '/game',
+  path: '/game',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -66,6 +72,7 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
+  '/game': typeof GameRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
 }
 export interface FileRoutesByTo {
+  '/game': typeof GameRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -87,6 +95,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
+  '/game': typeof GameRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/game'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/game'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_layout'
+    | '/game'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -132,6 +144,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
+  GameRoute: typeof GameRoute
   LoginRoute: typeof LoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game': {
+      id: '/game'
+      path: '/game'
+      fullPath: '/game'
+      preLoaderRoute: typeof GameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -225,6 +245,7 @@ const LayoutRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
+  GameRoute: GameRoute,
   LoginRoute: LoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,

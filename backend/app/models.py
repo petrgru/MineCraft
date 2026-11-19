@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
@@ -124,3 +125,81 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# ---- Voxel mini-game models ----
+
+TOTAL_LEVELS = 12
+# L1 4x10, L2 5x20, L3 chest 50, L4 cannon 4 balloons, L5 6x10, L6 7x20,
+# L7 memory 3x20, L8 chest 50, L9 cannon 5x20+4x15, L10 8x10,
+# L11 memory 5x20, L12 6 stars x15 + rocket 100.
+MAX_GAME_POINTS = 40 + 100 + 50 + 80 + 60 + 140 + 60 + 50 + 160 + 80 + 100 + 190
+
+
+class AvatarType(str, Enum):
+    """The four big animal avatars a kid can pick with one mouse click."""
+
+    LION = "lion"
+    FOX = "fox"
+    BEAR = "bear"
+    FROG = "frog"
+
+
+class QuickLoginRequest(SQLModel):
+    avatar: AvatarType
+    player_name: str | None = Field(default=None, min_length=1, max_length=32)
+
+
+# Database model: one finished game run submitted from the browser.
+# avatar is stored as a plain string so PostgreSQL never needs a native enum type.
+class Score(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    player_name: str = Field(max_length=32, index=True)
+    avatar: str = Field(default=AvatarType.LION.value, max_length=16)
+    points: int = Field(default=0, ge=0, le=MAX_GAME_POINTS)
+    completed_levels: int = Field(default=0, ge=0, le=TOTAL_LEVELS)
+    created_at: datetime | None = Field(default_factory=get_datetime_utc)
+
+
+# Properties to receive on score creation (player_name comes from the token, not the client)
+class ScoreCreate(SQLModel):
+    avatar: AvatarType = AvatarType.LION
+    points: int = Field(ge=0, le=MAX_GAME_POINTS)
+    completed_levels: int = Field(default=0, ge=0, le=TOTAL_LEVELS)
+
+
+class ScorePublic(SQLModel):
+    id: uuid.UUID
+    player_name: str
+    avatar: AvatarType
+    points: int
+    completed_levels: int
+    created_at: datetime | None = None
+
+
+class LeaderboardPublic(SQLModel):
+    scores: list[ScorePublic]
+
+
+# Per-kid persisted game state: which level to resume at and the points bank.
+# Failed levels keep current_level unchanged, so the kid always returns there.
+class GameProgress(SQLModel, table=True):
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", primary_key=True, ondelete="CASCADE"
+    )
+    current_level: int = Field(default=1, ge=1, le=TOTAL_LEVELS)
+    total_points: int = Field(default=0, ge=0, le=MAX_GAME_POINTS)
+    is_finished: bool = Field(default=False)
+    updated_at: datetime | None = Field(default_factory=get_datetime_utc)
+
+
+class ProgressUpdate(SQLModel):
+    current_level: int = Field(ge=1, le=TOTAL_LEVELS)
+    total_points: int = Field(ge=0, le=MAX_GAME_POINTS)
+    is_finished: bool = False
+
+
+class ProgressPublic(SQLModel):
+    current_level: int
+    total_points: int
+    is_finished: bool
